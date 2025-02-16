@@ -1,0 +1,4 @@
+env
+.env
+thyroid_cancer_prediction.db
+__pycache__
