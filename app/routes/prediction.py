@@ -11,17 +11,34 @@ router = APIRouter(prefix="/prediction", tags=["Predictions"])
 @router.post("", response_model=Profile)
 def predict(profile_data: ProfileBase, session: SessionDep):
     df = pd.DataFrame(
-        {"gender": [profile_data.gender.value]},
-        {"ethnicity": [profile_data.ethnicity.value]},
-        {"family_history": [profile_data.family_history.value]},
-        {"radiation_exposure": [profile_data.radiation_exposure]},
-        {"iodine_deficiency": [profile_data.iodine_deficiency]},
-        {"smoking": [profile_data.smoking]},
-        {"nodule_size": [profile_data.nodule_size]},
+        {
+            "Age": [66],
+            "Gender": [profile_data.gender.value],
+            "Country": ["Russia"],
+            "Ethnicity": [profile_data.ethnicity.value],
+            "Family_History": [profile_data.family_history.value],
+            "Radiation_Exposure": [profile_data.radiation_exposure],
+            "Iodine_Deficiency": [profile_data.iodine_deficiency],
+            "Smoking": [profile_data.smoking],
+            "Obesity": [profile_data.smoking],
+            "Diabetes": [profile_data.smoking],
+            "TSH_Level": [9.37],
+            "T3_Level": [1.67],
+            "T4_Level": [6.16],
+            "Nodule_Size": [profile_data.nodule_size],
+            "Thyroid_Cancer_Risk": ["Low"],
+        },
     )
     pipeline = joblib.load("pipeline.pkl")
-    pipeline.predict(df)
-    profile = Profile(**profile_data.model_dump(), diagnosis="Negative")
+    prediction = pipeline.predict(df)
+    if prediction[0] == 0:
+        diagnosis = "Negative"
+    elif prediction[0] == 1:
+        diagnosis = "Positive"
+    else:
+        diagnosis = "Unknown"
+
+    profile = Profile(**profile_data.model_dump(), diagnosis=diagnosis)
     session.add(profile)
     session.commit()
     session.refresh(profile)
