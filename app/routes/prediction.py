@@ -15,3 +15,9 @@ def predict(profile_data: ProfileBase, session: SessionDep):
     session.commit()
     session.refresh(profile)
     return profile
+
+
+@router.get("", response_model=list[Profile])
+def get_predictions(session: SessionDep):
+    predictions = session.exec(select(Profile)).all()
+    return predictions
